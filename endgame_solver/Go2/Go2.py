@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/Library/Frameworks/Python.framework/Versions/3.5/bin/python3
 # Set the path to your python3 above
 
 # Set up relative path for util; sys.path[0] is directory of current program
@@ -30,6 +30,7 @@ class Go2():
         self.name = "Go2"
         self.version = 0.1
         self.timelimit = 1
+        self.depth_limit = 14
 
     def get_move(self, board, color):
         return GoBoardUtil.generate_random_move(board,color,True)
@@ -44,7 +45,7 @@ class Go2():
 
         signal.alarm(self.timelimit)
         try:
-            result = self.negamaxBoolean(state, proof_tree)
+            result = self.negamaxBoolean(state, self.depth_limit, proof_tree)
         except Exception as e:
             # print(e)
             result = None
@@ -79,24 +80,23 @@ class Go2():
         # print(state.current_player, legal_moves)
         return legal_moves
 
-    def negamaxBoolean(self, state, proof_tree):
-        if state.end_of_game():
+    def negamaxBoolean(self, state, depth, proof_tree):
+        if depth == 0 or state.end_of_game():
             winner, score = state.score(self.komi)
-            # print('-----------', winner, '-----------')
+            # print(winner)
             if winner == state.current_player:
                 return True
             else:
                 return False
         for m in self.get_legal_moves(state):
-            #---------------
+            # debug
             # if m:
             #     coord = state._point_to_coord(m)
             #     print(GoBoardUtil.format_point(coord))
             # else:
             #     print('pass')
-            #---------------
             state.move(m, state.current_player)
-            success = not self.negamaxBoolean(state, proof_tree)
+            success = not self.negamaxBoolean(state, depth-1, proof_tree)
             state.undo_move()
             if success:
                 proof_tree.append(m)
