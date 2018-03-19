@@ -1,10 +1,12 @@
 #!/usr/bin/python3
+
 import os, sys
 utilpath = sys.path[0] + "/../util/"
 sys.path.append(utilpath)
 
-from gtp_connection import GtpConnection  
+from gtp_connection_go3 import GtpConnectionGo3
 from board_util import GoBoardUtil
+from board_util_go3 import GoBoardUtil_Go3
 from simple_board import SimpleGoBoard
 from ucb import runUcb
 import numpy as np
@@ -61,13 +63,13 @@ class Go3Player(object):
         self.random_simulation = True if simulations == 'random' else False
         self.use_pattern = not self.random_simulation
         self.check_selfatari = move_filter
- 
+
     def simulate(self, board, cboard, move, toplay):
         GoBoardUtil.copyb2b(board,cboard)
         assert cboard.board.all() == board.board.all()
         cboard.move(move, toplay)
         opp = GoBoardUtil.opponent(toplay)
-        return GoBoardUtil.playGame(cboard,
+        return GoBoardUtil_Go3.playGame(cboard,
                 opp,
                 komi=self.komi,
                 limit=self.limit,
@@ -82,7 +84,7 @@ class Go3Player(object):
             if result == toplay:
                 wins += 1
         return wins
-    
+
     def get_move(self, board, toplay):
         cboard = board.copy()
         emptyPoints = board.get_empty_points()
@@ -116,7 +118,7 @@ def run():
     start the gtp connection and wait for commands.
     """
     board = SimpleGoBoard(7)
-    con = GtpConnection(Go3Player(num_simulation), board)
+    con = GtpConnectionGo3(Go3Player(num_simulation), board)
     con.start_connection()
 
 if __name__=='__main__':
@@ -127,4 +129,3 @@ if __name__=='__main__':
         print('simulations must be random or rulebased')
         sys.exit(0)
     run()
-
